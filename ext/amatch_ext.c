@@ -338,6 +338,72 @@ static VALUE Levenshtein_search(General *amatch, VALUE string)
     return result;
 }
 
+static void invert_string(const char *orig, char *target, int len)
+{
+    int i;
+
+    for (i = 0; i < len; i ++) {
+        target[i] = orig[len - i - 1];
+    }
+}
+
+static VALUE Levenshtein_best_match(General *amatch, VALUE string)
+{
+    VALUE result;
+    char *a_ptr, *b_ptr, *tmp;
+    int a_len, b_len;
+    int *v[2], weight, min;
+    int  i, j, c, p;
+    int start, end;
+
+    Check_Type(string, T_STRING);
+    DONT_OPTIMIZE
+
+    v[0] = ALLOC_N(int, b_len + 1);
+    v[1] = ALLOC_N(int, b_len + 1);
+    MEMZERO(v[0], int, b_len + 1);
+    MEMZERO(v[1], int, b_len + 1);
+
+    COMPUTE_LEVENSHTEIN_DISTANCE
+
+    for (i = 0, min = a_len; i <= b_len; i++) {
+        if (v[p][i] < min) {
+            min = v[p][i];
+            end = i;
+        }
+    }
+
+    tmp = xmalloc((a_len) * sizeof(char));
+    invert_string(a_ptr, tmp, a_len);
+    a_ptr = tmp;
+    b_len = end;
+    tmp = xmalloc((b_len) * sizeof(char));
+    invert_string(b_ptr, tmp, b_len);
+    b_ptr = tmp;
+
+    MEMZERO(v[0], int, b_len + 1);
+    MEMZERO(v[1], int, b_len + 1);
+
+    COMPUTE_LEVENSHTEIN_DISTANCE
+
+    for (i = 0, min = a_len; i <= b_len; i++) {
+        if (v[p][i] < min) {
+            min = v[p][i];
+            start = end - i;
+        }
+    }
+
+    xfree(a_ptr);
+    xfree(b_ptr);
+
+    result = rb_range_new(INT2FIX(start), INT2FIX(end), 1);
+
+    xfree(v[0]);
+    xfree(v[1]);
+
+    return result;
+}
+
 
 /*
  * Sellers edit distances are computed here:
@@ -862,6 +928,12 @@ static VALUE rb_Levenshtein_search(VALUE self, VALUE strings)
 {                                                                            
     GET_STRUCT(General)
     return General_iterate_strings(amatch, strings, Levenshtein_search);
+}
+
+static VALUE rb_Levenshtein_best_match(VALUE self, VALUE strings)
+{
+    GET_STRUCT(General)
+    return General_iterate_strings(amatch, strings, Levenshtein_best_match);
 }
 
 /* 
@@ -1571,6 +1643,7 @@ void Init_amatch_ext()
     rb_define_method(rb_cLevenshtein, "match", rb_Levenshtein_match, 1);
     rb_define_method(rb_cLevenshtein, "search", rb_Levenshtein_search, 1);
     rb_define_method(rb_cLevenshtein, "similar", rb_Levenshtein_similar, 1);
+    rb_define_method(rb_cLevenshtein, "best_match", rb_Levenshtein_best_match, 1);
     rb_define_method(rb_mAmatchStringMethods, "levenshtein_similar", rb_str_levenshtein_similar, 1);
 
     /* Sellers */

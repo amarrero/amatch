@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = "amatch"
-  s.version = "0.2.11"
+  s.version = "0.2.11.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Florian Frank"]
-  s.date = "2013-01-16"
+  s.date = "2013-06-20"
   s.description = "Amatch is a library for approximate string matching and searching in strings.\nSeveral algorithms can be used to do this, and it's also possible to compute a\nsimilarity metric number between 0.0 and 1.0 for two given strings.\n"
   s.email = "flori@ping.de"
   s.executables = ["agrep.rb"]
@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/flori/amatch"
   s.rdoc_options = ["--title", "Amatch - Approximate Matching", "--main", "README.rdoc"]
   s.require_paths = ["lib", "ext"]
-  s.rubygems_version = "1.8.24"
+  s.rubygems_version = "1.8.25"
   s.summary = "Approximate String Matching library"
   s.test_files = ["tests/test_hamming.rb", "tests/test_jaro.rb", "tests/test_jaro_winkler.rb", "tests/test_levenshtein.rb", "tests/test_longest_subsequence.rb", "tests/test_longest_substring.rb", "tests/test_pair_distance.rb", "tests/test_sellers.rb"]
 
